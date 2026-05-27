@@ -9,42 +9,30 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <style>
-        /* CSS reset cơ bản */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { margin-bottom: 20px; color: #333; }
-        
-        /* Layout phần thanh tìm kiếm & nút thêm */
         .top-bar { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .search-bar { flex-grow: 1; margin-right: 15px; }
         .search-bar input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 4px; }
-        
-        /* Table styles */
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
         th { background: #4CAF50; color: white; font-weight: bold; }
         tr:nth-child(even) { background: #f9f9f9; }
         tr:hover { background: #f5f5f5; }
-        
-        /* Nút bấm */
         button { padding: 8px 16px; margin: 0 4px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
         .btn-primary { background: #4CAF50; color: white; }
         .btn-edit { background: #ff9800; color: white; }
         .btn-delete { background: #f44336; color: white; }
         button:disabled { background: #cccccc; cursor: not-allowed; }
-
-        /* Modal Overlay */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90%; }
         .modal-content label { display: block; margin-top: 10px; font-weight: bold; }
         .modal-content input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; }
         .error { color: red; font-size: 13px; margin-top: 5px; }
         .modal-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-
         .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
-        
-        /* Chạy trên điện thoại */
         @media (max-width: 768px) {
             .top-bar { flex-direction: column; gap: 10px; }
             .search-bar { margin-right: 0; }
@@ -58,7 +46,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // 1. Thanh tìm kiếm
         function SearchBar({ value, onChange }) {
             const [searchInput, setSearchInput] = React.useState(value);
 
@@ -83,7 +70,6 @@
             );
         }
 
-        // 2. Component Bảng hiển thị
         function UserTable({ users, onEdit, onDelete, page, limit }) {
             return (
                 <div className="table-wrapper">
@@ -106,7 +92,6 @@
                             ) : (
                                 users.map((user, index) => (
                                     <tr key={user._id}>
-                                        {/* Tính toán hiển thị STT liên tục kể cả qua trang khác */}
                                         <td>{(page - 1) * limit + index + 1}</td>
                                         <td>{user.name}</td>
                                         <td>{user.age}</td>
@@ -127,7 +112,6 @@
             );
         }
 
-        // 3. Component Phân trang
         function Pagination({ page, totalPages, limit, onPageChange, onLimitChange }) {
             return (
                 <div className="pagination">
@@ -148,9 +132,7 @@
             );
         }
 
-        // 4. Modal Thêm/Sửa User
         function UserModal({ user, onClose, onSave }) {
-            // Nếu có user truyền vào thì là mode Sửa, ko thì là mode Thêm mới
             const [formData, setFormData] = React.useState(
                 user || { name: "", age: "", email: "", address: "" }
             );
@@ -160,7 +142,6 @@
                 setFormData({ ...formData, [e.target.name]: e.target.value });
             };
 
-            // Hàm tự validate ở Frontend trước khi gửi
             const validate = () => {
                 const newErrors = {};
                 const nameStr = formData.name ? String(formData.name).trim() : "";
@@ -176,14 +157,13 @@
                 }
                 
                 setErrors(newErrors);
-                return Object.keys(newErrors).length === 0; // Trả về true nếu ko có lỗi nào
+                return Object.keys(newErrors).length === 0;
             };
 
             const handleSubmit = () => {
-                if (!validate()) return; // Lỗi thì dừng luôn
+                if (!validate()) return;
 
-                // Chuẩn bị URL và Method
-                const url = user ? `http://localhost:3001/api/users/${user._id}` : 'http://localhost:3001/api/users';
+                const url = user ? `https://ex3-ei29.onrender.com/api/users/${user._id}` : 'https://ex3-ei29.onrender.com/api/users';
                 const method = user ? "PUT" : "POST";
 
                 fetch(url, {
@@ -202,7 +182,7 @@
                         alert("Lỗi rồi: " + (resData.body.error || "Lỗi không xác định"));
                     } else {
                         alert(resData.body.message);
-                        onSave(); // Gọi API get lại list
+                        onSave();
                     }
                 })
                 .catch(err => alert("Lỗi mạng/Server chưa bật: " + err.message));
@@ -210,7 +190,6 @@
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
-                    {/* onClick e.stopPropagation() để lúc bấm vào bên trong modal ko bị trigger onClose */}
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>{user ? "Cập nhật người dùng" : "Thêm mới người dùng"}</h3>
                         
@@ -238,9 +217,7 @@
             );
         }
 
-        // 5. Component gốc App
         function App() {
-            // Khai báo State quản lý dữ liệu
             const [users, setUsers] = React.useState([]);
             const [page, setPage] = React.useState(1);
             const [limit, setLimit] = React.useState(5);
@@ -251,15 +228,13 @@
             const [showModal, setShowModal] = React.useState(false);
             const [editingUser, setEditingUser] = React.useState(null);
 
-            // Hàm gọi API lấy danh sách
             const fetchUsers = React.useCallback(() => {
-                fetch(`http://localhost:3001/api/users?page=${page}&limit=${limit}&search=${search}`)
+                fetch(`https://ex3-ei29.onrender.com/api/users?page=${page}&limit=${limit}&search=${search}`)
                     .then(res => res.json())
                     .then(data => {
                         setUsers(data.data || []);
                         setTotal(data.total || 0);
                         setTotalPages(data.totalPages || 0);
-                        // Xử lý nốt case xóa hết user ở trang cuối thì lùi về 1 trang
                         if (data.data && data.data.length === 0 && page > 1) {
                             setPage(page - 1);
                         }
@@ -267,13 +242,12 @@
                     .catch(err => console.error("Không call được API:", err));
             }, [page, limit, search]);
 
-            // Mỗi khi state thay đổi là fetch lại
             React.useEffect(() => {
                 fetchUsers();
             }, [fetchUsers]);
 
             const handleDelete = (id) => {
-                fetch(`http://localhost:3001/api/users/${id}`, { method: "DELETE" })
+                fetch(`https://ex3-ei29.onrender.com/api/users/${id}`, { method: "DELETE" })
                     .then(res => res.json())
                     .then(data => {
                         if (data.error) alert("Lỗi: " + data.error);
@@ -286,12 +260,12 @@
 
             const handleSearchChange = (newSearch) => {
                 setSearch(newSearch);
-                setPage(1); // Gõ search mới thì nhảy về trang 1
+                setPage(1);
             };
 
             const handleLimitChange = (newLimit) => {
                 setLimit(newLimit);
-                setPage(1); // Đổi hiển thị số dòng thì cũng nhảy về trang 1
+                setPage(1);
             };
 
             return (
@@ -332,7 +306,6 @@
             );
         }
 
-        // Render ra màn hình
         const root = ReactDOM.createRoot(document.getElementById("root"));
         root.render(<App />);
     </script>
